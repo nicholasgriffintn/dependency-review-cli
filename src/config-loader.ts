@@ -92,7 +92,8 @@ export class ConfigLoader {
   }
 
   private validateConfig(config: Config): void {
-    if (config.allowLicenses && config.denyLicenses) {
+    if (config.allowLicenses && config.allowLicenses.length > 0 && 
+        config.denyLicenses && config.denyLicenses.length > 0) {
       throw new Error('Cannot specify both allow-licenses and deny-licenses')
     }
 
