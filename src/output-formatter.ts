@@ -261,9 +261,12 @@ export class OutputFormatter {
   }
 
   private getHighestSeverity(vulnerabilities: any[]): string {
-    const severityOrder = { critical: 4, high: 3, moderate: 2, low: 1 }
+    const severityOrder: Record<string, number> = { critical: 4, high: 3, moderate: 2, low: 1 }
     return vulnerabilities.reduce((highest, vuln) => {
-      return severityOrder[vuln.severity] > severityOrder[highest] ? vuln.severity : highest
+      const vulnSeverity = vuln.severity as string
+      const currentSeverity = severityOrder[vulnSeverity] || 0
+      const highestSeverity = severityOrder[highest] || 0
+      return currentSeverity > highestSeverity ? vulnSeverity : highest
     }, 'low')
   }
 
