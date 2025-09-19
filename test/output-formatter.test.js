@@ -42,6 +42,27 @@ describe('OutputFormatter', () => {
     assert.strictEqual(parsed.hasIssues, false)
     assert.strictEqual(parsed.summary.totalChanges, 1)
     assert.strictEqual(parsed.summary.added, 1)
+    assert.strictEqual(parsed.scorecard, null)
+  })
+
+  it('should include scorecard data in JSON output', () => {
+    const formatter = new OutputFormatter('json')
+    const results = createMockResults({
+      scorecard: {
+        dependencies: [{
+          change: { name: 'test-pkg', version: '1.0.0' },
+          scorecard: { score: 3.5 }
+        }]
+      }
+    })
+    
+    const output = formatter.format(results, mockComparison)
+    const parsed = JSON.parse(output)
+
+    assert(parsed.scorecard)
+    assert.strictEqual(parsed.scorecard.dependencies.length, 1)
+    assert.strictEqual(parsed.scorecard.dependencies[0].change.name, 'test-pkg')
+    assert.strictEqual(parsed.scorecard.dependencies[0].scorecard.score, 3.5)
   })
 
   it('should format table output', () => {
@@ -70,6 +91,29 @@ describe('OutputFormatter', () => {
     assert(output.includes('Vulnerabilities: 1'))
     assert(output.includes('🚨 Vulnerable Dependencies'))
     assert(output.includes('vulnerable-pkg@1.0.0 - HIGH - GHSA-1234'))
+  })
+
+  it('should include scorecard data in table output', () => {
+    const formatter = new OutputFormatter('table')
+    const results = createMockResults({
+      scorecard: {
+        dependencies: [{
+          change: { name: 'low-score-pkg', version: '1.0.0' },
+          scorecard: { score: 3.5 }
+        }, {
+          change: { name: 'good-pkg', version: '2.0.0' },
+          scorecard: { score: 8.2 }
+        }]
+      }
+    })
+    
+    const output = formatter.format(results, mockComparison)
+
+    assert(output.includes('📊 Security Score Concerns'))
+    assert(output.includes('1 packages with low security scores (< 5.0/10):'))
+    assert(output.includes('low-score-pkg@1.0.0 - Score: 3.5/10'))
+    assert(!output.includes('good-pkg@2.0.0'))
+    assert(!output.includes('8.2/10'))
   })
 
   it('should format summary output with critical vulnerability', () => {

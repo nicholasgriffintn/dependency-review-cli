@@ -22,6 +22,7 @@ export class OutputFormatter {
       vulnerableChanges: results.vulnerableChanges,
       invalidLicenseChanges: results.invalidLicenseChanges,
       deniedChanges: results.deniedChanges,
+      scorecard: results.scorecard,
       snapshotWarnings: comparison.snapshot_warnings,
       hasIssues: results.hasIssues
     }, null, 2)
@@ -61,6 +62,20 @@ export class OutputFormatter {
       output += '\n⚠️ Invalid SPDX License Expressions\n'
       for (const change of results.invalidLicenseChanges.unresolved) {
         output += `${change.name}@${change.version} - License: ${change.license || 'Unknown'} (Invalid SPDX)\n`
+      }
+    }
+
+    if (results.scorecard && results.scorecard.dependencies.length > 0) {
+      const lowScorePackages = results.scorecard.dependencies
+        .filter(entry => entry.scorecard && entry.scorecard.score !== undefined && entry.scorecard.score < 5)
+      
+      if (lowScorePackages.length > 0) {
+        output += '\n📊 Security Score Concerns\n'
+        output += `${lowScorePackages.length} packages with low security scores (< 5.0/10):\n`
+        
+        for (const entry of lowScorePackages) {
+          output += `${entry.change.name}@${entry.change.version} - Score: ${entry.scorecard.score}/10\n`
+        }
       }
     }
 
