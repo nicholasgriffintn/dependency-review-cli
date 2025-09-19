@@ -22,6 +22,7 @@ export class OutputFormatter {
       vulnerableChanges: results.vulnerableChanges,
       invalidLicenseChanges: results.invalidLicenseChanges,
       deniedChanges: results.deniedChanges,
+      scorecard: results.scorecard,
       snapshotWarnings: comparison.snapshot_warnings,
       hasIssues: results.hasIssues
     }, null, 2)
@@ -64,6 +65,20 @@ export class OutputFormatter {
       }
     }
 
+    if (results.scorecard && results.scorecard.dependencies.length > 0) {
+      const lowScorePackages = results.scorecard.dependencies
+        .filter(entry => entry.scorecard && entry.scorecard.score !== undefined && entry.scorecard.score < 5)
+      
+      if (lowScorePackages.length > 0) {
+        output += '\n📊 Security Score Concerns\n'
+        output += `${lowScorePackages.length} packages with low security scores (< 5.0/10):\n`
+        
+        for (const entry of lowScorePackages) {
+          output += `${entry.change.name}@${entry.change.version} - Score: ${entry.scorecard.score}/10\n`
+        }
+      }
+    }
+
     return output
   }
 
@@ -73,7 +88,7 @@ export class OutputFormatter {
     const status = results.hasIssues ? '❌ Issues Found' : '✅ All Clear'
     const statusColor = results.hasIssues ? '#d73a49' : '#28a745'
     
-    output += `## 🔍 dependency Review Results\n\n`
+    output += `## 🔍 Dependency Review Results\n\n`
     output += `<div style="background: ${results.hasIssues ? '#fff5f5' : '#f0fff4'}; border: 1px solid ${statusColor}; border-radius: 6px; padding: 16px; margin: 12px 0;">\n`
     output += `<h3 style="color: ${statusColor}; margin: 0 0 8px 0;">${status}</h3>\n`
     output += `<strong>${results.summary.added} dependencies added</strong> • ${results.summary.removed} removed`
