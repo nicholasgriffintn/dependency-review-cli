@@ -76,7 +76,6 @@ program
       
       console.log(output)
 
-      // Comment on PR if requested
       if (cliOptions.commentSummaryInPr && cliOptions.commentSummaryInPr !== 'never' && cliOptions.prNumber) {
         console.log('Adding comment to PR...')
         const commenter = new PrCommenter()

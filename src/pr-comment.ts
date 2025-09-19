@@ -1,6 +1,7 @@
 import { Octokit } from '@octokit/rest'
-import { ReviewResults } from './review-engine.js'
-import { ComparisonResponse } from './types.js'
+
+import type { ReviewResults } from './review-engine.js'
+import type { ComparisonResponse } from './types.js'
 import { OutputFormatter } from './output-formatter.js'
 
 export interface PrCommentOptions {
@@ -39,7 +40,6 @@ export class PrCommenter {
     const commentBody = `${this.commentMarker}\n## 🔍 Dependency Review Results\n\n${content}`
 
     try {
-      // First, try to find existing comment
       const { data: comments } = await this.octokit.rest.issues.listComments({
         owner: options.owner,
         repo: options.repo,
@@ -51,7 +51,6 @@ export class PrCommenter {
       )
 
       if (existingComment) {
-        // Update existing comment
         await this.octokit.rest.issues.updateComment({
           owner: options.owner,
           repo: options.repo,
@@ -59,7 +58,6 @@ export class PrCommenter {
           body: commentBody
         })
       } else {
-        // Create new comment
         await this.octokit.rest.issues.createComment({
           owner: options.owner,
           repo: options.repo,
