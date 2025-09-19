@@ -35,7 +35,14 @@
     "@octokit/rest": "22.0.0",
     "commander": "14.0.1",
     "yaml": "2.8.1",
-    "zod": "4.1.9"
+    "zod": "4.1.9",
+    "lodash": "4.17.20",
+    "axios": "0.21.0",
+    "serialize-javascript": "5.0.0",
+    "ffmpeg-static": "4.4.0",
+    "readline-sync": "1.4.10",
+    "node-rsa": "1.1.1",
+    "spdx-license-list": "6.8.0"
   },
   "devDependencies": {
     "@types/node": "24.5.2",
