@@ -57,4 +57,6 @@ export interface CliOptions {
   output?: 'json' | 'table' | 'summary'
   failOnSeverity?: 'critical' | 'high' | 'moderate' | 'low'
   warnOnly?: boolean
+  commentSummaryInPr?: 'always' | 'on-failure' | 'never'
+  prNumber?: number
 }
