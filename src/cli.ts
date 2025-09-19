@@ -3,11 +3,11 @@
 import { Command } from 'commander'
 
 import { GitHubClient } from './github-client.js'
-import { ReviewEngine } from './review-engine.js'
+import { ReviewEngine, type ReviewResults } from './review-engine.js'
 import { OutputFormatter } from './output-formatter.js'
 import { ConfigLoader } from './config-loader.js'
 import { PrCommenter } from './pr-comment.js'
-import { CliOptions } from './types.js'
+import type { CliOptions } from './types.js'
 
 const program = new Command()
 
@@ -62,14 +62,34 @@ program
         headRef
       })
 
-      if (!comparison.changes || comparison.changes.length === 0) {
-        console.log('✅ No dependency changes found.')
-        return
-      }
+      let results: ReviewResults
+      const hasChanges = comparison.changes && comparison.changes.length > 0
 
-      console.log('Analyzing dependencies...')
-      const reviewEngine = new ReviewEngine(config)
-      const results = await reviewEngine.analyze(comparison)
+      if (hasChanges) {
+        console.log('Analyzing dependencies...')
+        const reviewEngine = new ReviewEngine(config)
+        results = await reviewEngine.analyze(comparison)
+      } else {
+        console.log('✅ No dependency changes found.')
+
+        results = {
+          vulnerableChanges: [],
+          invalidLicenseChanges: { forbidden: [], unresolved: [], unlicensed: [] },
+          deniedChanges: [],
+          scorecard: null,
+          hasIssues: false,
+          summary: {
+            totalChanges: 0,
+            added: 0,
+            removed: 0,
+            vulnerabilities: 0,
+            criticalVulns: 0,
+            highVulns: 0,
+            moderateVulns: 0,
+            lowVulns: 0
+          }
+        }
+      }
 
       const formatter = new OutputFormatter(cliOptions.output || 'summary')
       const output = formatter.format(results, comparison)
