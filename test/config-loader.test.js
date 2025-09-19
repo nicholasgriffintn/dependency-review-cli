@@ -93,6 +93,7 @@ vulnerability-check: false
   it('should load valid config file', async () => {
     const configContent = `
 fail-on-severity: high
+deny-licenses: []
 allow-licenses:
   - MIT
   - Apache-2.0

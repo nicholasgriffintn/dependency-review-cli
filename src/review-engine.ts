@@ -114,7 +114,7 @@ export class ReviewEngine {
       }
 
       try {
-        if (this.config.allowLicenses) {
+        if (this.config.allowLicenses && this.config.allowLicenses.length > 0) {
           if (spdx.isValid(change.license)) {
             const found = spdx.satisfies(change.license, this.config.allowLicenses.join(' OR '))
             if (!found) {
@@ -123,7 +123,7 @@ export class ReviewEngine {
           } else {
             unresolved.push(change)
           }
-        } else if (this.config.denyLicenses) {
+        } else if (this.config.denyLicenses && this.config.denyLicenses.length > 0) {
           if (spdx.isValid(change.license)) {
             const found = spdx.satisfiesAny(change.license, this.config.denyLicenses)
             if (found) {
