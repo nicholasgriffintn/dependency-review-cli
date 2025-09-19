@@ -1,7 +1,6 @@
 import { Octokit } from '@octokit/rest'
 
-import type { ReviewResults } from './review-engine.js'
-import type { ComparisonResponse } from './types.js'
+import type { ComparisonResponse, ReviewResults } from './types.js'
 import { OutputFormatter } from './output-formatter.js'
 
 export interface PrCommentOptions {
