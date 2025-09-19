@@ -73,7 +73,7 @@ export class OutputFormatter {
     const status = results.hasIssues ? '❌ Issues Found' : '✅ All Clear'
     const statusColor = results.hasIssues ? '#d73a49' : '#28a745'
     
-    output += `## 🔍 dependency Review Results\n\n`
+    output += `## 🔍 Dependency Review Results\n\n`
     output += `<div style="background: ${results.hasIssues ? '#fff5f5' : '#f0fff4'}; border: 1px solid ${statusColor}; border-radius: 6px; padding: 16px; margin: 12px 0;">\n`
     output += `<h3 style="color: ${statusColor}; margin: 0 0 8px 0;">${status}</h3>\n`
     output += `<strong>${results.summary.added} dependencies added</strong> • ${results.summary.removed} removed`

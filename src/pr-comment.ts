@@ -37,7 +37,7 @@ export class PrCommenter {
     const formatter = new OutputFormatter('summary')
     const content = formatter.format(results, comparison)
     
-    const commentBody = `${this.commentMarker}\n## 🔍 Dependency Review Results\n\n${content}`
+    const commentBody = `${this.commentMarker}\n${content}`
 
     try {
       const { data: comments } = await this.octokit.rest.issues.listComments({
