@@ -1,5 +1,4 @@
-import type { ReviewResults } from './review-engine.js'
-import type { ComparisonResponse } from './types.js'
+import type { ComparisonResponse, ReviewResults } from './types.js'
 
 export class OutputFormatter {
   constructor(private outputFormat: 'json' | 'table' | 'summary') {}
