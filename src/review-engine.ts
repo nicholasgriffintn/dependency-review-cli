@@ -1,28 +1,6 @@
-import type { Config, DependencyChange, ComparisonResponse, ScorecardData } from './types.js'
-import { getScorecardLevels } from './scorecard.js'
+import type { Config, DependencyChange, ComparisonResponse, ReviewResults } from './types.js'
+import { ScorecardService } from './scorecard.js'
 import * as spdx from './spdx.js'
-
-export interface ReviewResults {
-  vulnerableChanges: DependencyChange[]
-  invalidLicenseChanges: {
-    forbidden: DependencyChange[]
-    unresolved: DependencyChange[]
-    unlicensed: DependencyChange[]
-  }
-  deniedChanges: DependencyChange[]
-  scorecard: ScorecardData | null
-  hasIssues: boolean
-  summary: {
-    totalChanges: number
-    added: number
-    removed: number
-    vulnerabilities: number
-    criticalVulns: number
-    highVulns: number
-    moderateVulns: number
-    lowVulns: number
-  }
-}
 
 export class ReviewEngine {
   constructor(private config: Config) {}
@@ -39,9 +17,10 @@ export class ReviewEngine {
       : { forbidden: [], unresolved: [], unlicensed: [] }
     
     const deniedChanges = this.filterDeniedPackages(changes)
-    
+
+    const scorecardService = new ScorecardService()
     const scorecard = this.config.showOpenSSFScorecard 
-      ? await getScorecardLevels(this.getScorecardChanges(changes))
+      ? await scorecardService.getScorecardLevels(this.getScorecardChanges(changes))
       : null
     
     const hasIssues = this.determineHasIssues(vulnerableChanges, invalidLicenseChanges, deniedChanges)

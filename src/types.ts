@@ -1,3 +1,16 @@
+export interface CliOptions {
+  owner: string
+  repo: string
+  baseRef: string
+  headRef: string
+  config?: string
+  output?: 'json' | 'table' | 'summary'
+  failOnSeverity?: 'critical' | 'high' | 'moderate' | 'low'
+  warnOnly?: boolean
+  commentSummaryInPr?: 'always' | 'on-failure' | 'never'
+  prNumber?: number
+}
+
 export interface DependencyChange {
   change_type: 'added' | 'removed'
   manifest: string
@@ -48,15 +61,45 @@ export interface ScorecardData {
   dependencies: ScorecardEntry[]
 }
 
-export interface CliOptions {
-  owner: string
-  repo: string
-  baseRef: string
-  headRef: string
-  config?: string
-  output?: 'json' | 'table' | 'summary'
-  failOnSeverity?: 'critical' | 'high' | 'moderate' | 'low'
-  warnOnly?: boolean
-  commentSummaryInPr?: 'always' | 'on-failure' | 'never'
-  prNumber?: number
+interface ScorecardCheck {
+  name: string
+  documentation: {
+    shortDescription: string
+    url: string
+  }
+  score: string
+  reason: string
+  details: string[]
+}
+
+export interface ScorecardResponse {
+  score: number
+  date: string
+  repo: {
+    name: string
+    commit: string
+  }
+  checks: ScorecardCheck[]
+}
+
+export interface ReviewResults {
+  vulnerableChanges: DependencyChange[]
+  invalidLicenseChanges: {
+    forbidden: DependencyChange[]
+    unresolved: DependencyChange[]
+    unlicensed: DependencyChange[]
+  }
+  deniedChanges: DependencyChange[]
+  scorecard: ScorecardData | null
+  hasIssues: boolean
+  summary: {
+    totalChanges: number
+    added: number
+    removed: number
+    vulnerabilities: number
+    criticalVulns: number
+    highVulns: number
+    moderateVulns: number
+    lowVulns: number
+  }
 }

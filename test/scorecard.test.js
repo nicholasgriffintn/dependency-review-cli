@@ -1,7 +1,7 @@
 import { describe, it, mock } from 'node:test'
 import assert from 'node:assert'
 
-import { getScorecardLevels } from '../src/scorecard.js'
+import { ScorecardService } from '../src/scorecard.js'
 
 const originalFetch = globalThis.fetch
 function mockFetch(url, response) {
@@ -47,7 +47,8 @@ describe('Scorecard', () => {
         vulnerabilities: []
       }]
 
-      const result = await getScorecardLevels(changes)
+      const scorecardService = new ScorecardService()
+      const result = await scorecardService.getScorecardLevels(changes)
 
       assert.strictEqual(result.dependencies.length, 1)
       assert.strictEqual(result.dependencies[0].change.name, 'test-package')
@@ -75,7 +76,8 @@ describe('Scorecard', () => {
         vulnerabilities: []
       }]
 
-      const result = await getScorecardLevels(changes)
+      const scorecardService = new ScorecardService()
+      const result = await scorecardService.getScorecardLevels(changes)
 
       assert.strictEqual(result.dependencies.length, 1)
       assert.strictEqual(result.dependencies[0].scorecard.score, 8.2)
@@ -123,7 +125,8 @@ describe('Scorecard', () => {
         vulnerabilities: []
       }]
 
-      const result = await getScorecardLevels(changes)
+      const scorecardService = new ScorecardService()
+      const result = await scorecardService.getScorecardLevels(changes)
 
       assert.strictEqual(result.dependencies.length, 1)
       assert.strictEqual(result.dependencies[0].scorecard.score, 6.1)
@@ -148,7 +151,8 @@ describe('Scorecard', () => {
         vulnerabilities: []
       }]
 
-      const result = await getScorecardLevels(changes)
+      const scorecardService = new ScorecardService()
+      const result = await scorecardService.getScorecardLevels(changes)
 
       assert.strictEqual(result.dependencies.length, 1)
       assert.strictEqual(result.dependencies[0].scorecard, null)
@@ -180,13 +184,101 @@ describe('Scorecard', () => {
         }
       ]
 
-      const result = await getScorecardLevels(changes)
+      const scorecardService = new ScorecardService()
+      const result = await scorecardService.getScorecardLevels(changes)
 
       assert.strictEqual(result.dependencies.length, 2)
       assert.strictEqual(result.dependencies[0].change.name, 'added-pkg')
       assert.strictEqual(result.dependencies[0].scorecard.score, 5.0)
       assert.strictEqual(result.dependencies[1].change.name, 'removed-pkg')
       assert.strictEqual(result.dependencies[1].scorecard, null)
+    } finally {
+      restoreFetch()
+    }
+  })
+
+  it('should cache scorecard results for repeated requests', async () => {
+    const mockScorecardResponse = { score: 7.5 }
+    let fetchCallCount = 0
+
+    globalThis.fetch = mock.fn(async (url) => {
+      if (url.includes('api.securityscorecards.dev')) {
+        fetchCallCount++
+        return {
+          ok: true,
+          json: async () => mockScorecardResponse
+        }
+      }
+      return { ok: false, status: 404 }
+    })
+
+    try {
+      const changes = [
+        {
+          change_type: 'added',
+          ecosystem: 'npm',
+          name: 'cached-pkg',
+          version: '1.0.0',
+          source_repository_url: 'https://github.com/test/cached-pkg',
+          vulnerabilities: []
+        },
+        {
+          change_type: 'added',
+          ecosystem: 'npm',
+          name: 'cached-pkg-2',
+          version: '2.0.0',
+          source_repository_url: 'https://github.com/test/cached-pkg',
+          vulnerabilities: []
+        }
+      ]
+
+      const scorecardService = new ScorecardService()
+      const result = await scorecardService.getScorecardLevels(changes)
+
+      assert.strictEqual(result.dependencies.length, 2)
+      assert.strictEqual(fetchCallCount, 1, 'Should only make one API call due to caching')
+      assert.strictEqual(result.dependencies[0].scorecard.score, 7.5)
+      assert.strictEqual(result.dependencies[1].scorecard.score, 7.5)
+    } finally {
+      restoreFetch()
+    }
+  })
+
+  it('should handle concurrent requests efficiently', async () => {
+    const mockScorecardResponse = { score: 8.0 }
+    let fetchCallCount = 0
+    const startTime = Date.now()
+
+    globalThis.fetch = mock.fn(async (url) => {
+      if (url.includes('api.securityscorecards.dev')) {
+        fetchCallCount++
+        await new Promise(resolve => setTimeout(resolve, 100))
+        return {
+          ok: true,
+          json: async () => mockScorecardResponse
+        }
+      }
+      return { ok: false, status: 404 }
+    })
+
+    try {
+      const changes = Array.from({ length: 10 }, (_, i) => ({
+        change_type: 'added',
+        ecosystem: 'npm',
+        name: `concurrent-pkg-${i}`,
+        version: '1.0.0',
+        source_repository_url: `https://github.com/test/concurrent-pkg-${i}`,
+        vulnerabilities: []
+      }))
+
+      const scorecardService = new ScorecardService()
+      const result = await scorecardService.getScorecardLevels(changes)
+
+      const endTime = Date.now()
+
+      assert.strictEqual(result.dependencies.length, 10)
+      assert.strictEqual(fetchCallCount, 10, 'Should make 10 API calls for 10 different repositories')
+      assert(endTime - startTime < 500, 'Should complete in under 500ms due to concurrency (would take 1000ms sequentially)')
     } finally {
       restoreFetch()
     }
