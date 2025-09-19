@@ -3,11 +3,11 @@
 import { Command } from 'commander'
 
 import { GitHubClient } from './github-client.js'
-import { ReviewEngine, type ReviewResults } from './review-engine.js'
+import { ReviewEngine } from './review-engine.js'
 import { OutputFormatter } from './output-formatter.js'
 import { ConfigLoader } from './config-loader.js'
 import { PrCommenter } from './pr-comment.js'
-import type { CliOptions } from './types.js'
+import type { CliOptions, ReviewResults } from './types.js'
 
 const program = new Command()
 
