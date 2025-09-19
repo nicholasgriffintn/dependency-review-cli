@@ -1,5 +1,6 @@
 import type { Config, DependencyChange, ComparisonResponse, ScorecardData } from './types.js'
 import { getScorecardLevels } from './scorecard.js'
+import * as spdx from './spdx.js'
 
 export interface ReviewResults {
   vulnerableChanges: DependencyChange[]
@@ -107,14 +108,33 @@ export class ReviewEngine {
         continue
       }
 
-      if (this.config.allowLicenses) {
-        if (!this.config.allowLicenses.includes(change.license)) {
-          forbidden.push(change)
+      if (change.license === 'NOASSERTION') {
+        unlicensed.push(change)
+        continue
+      }
+
+      try {
+        if (this.config.allowLicenses) {
+          if (spdx.isValid(change.license)) {
+            const found = spdx.satisfies(change.license, this.config.allowLicenses.join(' OR '))
+            if (!found) {
+              forbidden.push(change)
+            }
+          } else {
+            unresolved.push(change)
+          }
+        } else if (this.config.denyLicenses) {
+          if (spdx.isValid(change.license)) {
+            const found = spdx.satisfiesAny(change.license, this.config.denyLicenses)
+            if (found) {
+              forbidden.push(change)
+            }
+          } else {
+            unresolved.push(change)
+          }
         }
-      } else if (this.config.denyLicenses) {
-        if (this.config.denyLicenses.includes(change.license)) {
-          forbidden.push(change)
-        }
+      } catch {
+        unresolved.push(change)
       }
     }
 
