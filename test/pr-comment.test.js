@@ -89,7 +89,7 @@ describe('PrCommenter', () => {
     assert.strictEqual(createCall.arguments[0].repo, 'testrepo')
     assert.strictEqual(createCall.arguments[0].issue_number, 42)
     assert.ok(createCall.arguments[0].body.includes('dependency-review-cli'))
-    assert.ok(createCall.arguments[0].body.includes('Total changes: 3'))
+    assert.ok(createCall.arguments[0].body.includes('2 dependencies added'))
   })
 
   it('should update existing comment', async () => {
