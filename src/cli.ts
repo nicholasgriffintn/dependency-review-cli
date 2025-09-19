@@ -1,0 +1,84 @@
+#!/usr/bin/env node
+
+import { Command } from 'commander'
+
+import { GitHubClient } from './github-client.js'
+import { ReviewEngine } from './review-engine.js'
+import { OutputFormatter } from './output-formatter.js'
+import { ConfigLoader } from './config-loader.js'
+import { CliOptions } from './types.js'
+
+const program = new Command()
+
+program
+  .name('dependency-review')
+  .description('Review dependency changes and vulnerabilities using the GitHub API')
+  .version('1.0.0')
+
+program
+  .argument('<owner>', 'Repository owner')
+  .argument('<repo>', 'Repository name')
+  .argument('<base-ref>', 'Base git reference (commit SHA, branch, or tag)')
+  .argument('<head-ref>', 'Head git reference (commit SHA, branch, or tag)')
+  .option('-c, --config <path>', 'Path to configuration file')
+  .option('-o, --output <format>', 'Output format (json, table, summary)', 'summary')
+  .option('--fail-on-severity <severity>', 'Fail on vulnerability severity (low, moderate, high, critical)', 'low')
+  .option('--warn-only', 'Only warn, never fail the command')
+  .option('--no-license-check', 'Disable license checking')
+  .option('--no-vulnerability-check', 'Disable vulnerability checking')
+  .action(async (owner, repo, baseRef, headRef, options) => {
+    console.log('Initializing dependency review...')
+
+    try {
+      const cliOptions: CliOptions = {
+        owner,
+        repo,
+        baseRef,
+        headRef,
+        config: options.config,
+        output: options.output,
+        failOnSeverity: options.failOnSeverity,
+        warnOnly: options.warnOnly
+      }
+
+      console.log('Loading configuration...')
+      const configLoader = new ConfigLoader()
+      const config = await configLoader.load(cliOptions)
+
+      console.log('Connecting to GitHub...')
+      const githubClient = new GitHubClient()
+      await githubClient.getRepository(owner, repo)
+
+      console.log('Comparing dependency changes...')
+      const comparison = await githubClient.compareDependencies({
+        owner,
+        repo,
+        baseRef,
+        headRef
+      })
+
+      if (!comparison.changes || comparison.changes.length === 0) {
+        console.log('✅ No dependency changes found.')
+        return
+      }
+
+      console.log('Analyzing dependencies...')
+      const reviewEngine = new ReviewEngine(config)
+      const results = await reviewEngine.analyze(comparison)
+
+      const formatter = new OutputFormatter(cliOptions.output || 'summary')
+      const output = formatter.format(results, comparison)
+      
+      console.log(output)
+
+      if (results.hasIssues && !config.warnOnly) {
+        process.exit(1)
+      }
+
+    } catch (error) {
+      console.error(`❌ Error: ${error instanceof Error ? error.message : String(error)}`)
+      process.exit(1)
+    }
+  })
+
+program.parse()
