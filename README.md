@@ -4,12 +4,13 @@ A standalone CLI tool for reviewing dependency changes and vulnerabilities using
 
 ## Features
 
-- 🔍 **Vulnerability Detection**: Scan for known security vulnerabilities in dependencies
-- ⚖️ **License Compliance**: Check license compatibility and restrictions  
-- 🚫 **Package Restrictions**: Block specific packages or namespaces
-- 📊 **Multiple Output Formats**: JSON, table, or summary formats
-- 🎯 **Flexible Configuration**: Configure via CLI options or config files
-- 🚀 **GitHub Integration**: Uses the same GitHub Dependency Graph API as the official action
+- 🔍 **Vulnerability Detection**: Retrieves known security vulnerabilities in dependencies.
+- ⚖️ **License Compliance**: Check license compatibility and restrictions (Please note that by default, we have set a list of common copyleft licenses you can override this in the config file).
+- 🚫 **Package Restrictions**: Block specific packages or namespaces.
+- 📊 **Multiple Output Formats**: JSON, table, or summary formats,
+- 🎯 **Flexible Configuration**: Configure via CLI options or config files,
+- 🔍 **OpenSSF Scorecard**: Retrieves the OpenSSF Scorecard for the dependencies,
+- 🚀 **GitHub Integration**: Uses the same GitHub Dependency Graph API as the official action, and supports PR commenting.
 
 ## Installation
 
