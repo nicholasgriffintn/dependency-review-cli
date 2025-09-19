@@ -33,7 +33,10 @@
     "@octokit/plugin-retry": "8.0.1",
     "@octokit/request-error": "7.0.0",
     "@octokit/rest": "22.0.0",
+    "@onebeyond/spdx-license-satisfies": "1.0.1",
     "commander": "14.0.1",
+    "spdx-expression-parse": "4.0.0",
+    "spdx-satisfies": "6.0.0",
     "yaml": "2.8.1",
     "zod": "4.1.9"
   },

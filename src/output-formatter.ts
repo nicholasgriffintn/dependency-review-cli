@@ -57,6 +57,13 @@ export class OutputFormatter {
       }
     }
 
+    if (results.invalidLicenseChanges.unresolved.length > 0) {
+      output += '\n⚠️ Invalid SPDX License Expressions\n'
+      for (const change of results.invalidLicenseChanges.unresolved) {
+        output += `${change.name}@${change.version} - License: ${change.license || 'Unknown'} (Invalid SPDX)\n`
+      }
+    }
+
     return output
   }
 
@@ -101,7 +108,14 @@ export class OutputFormatter {
     if (results.invalidLicenseChanges.forbidden.length > 0) {
       output += '\n⚖️ License Issues:\n'
       for (const change of results.invalidLicenseChanges.forbidden) {
-        output += `• ${change.name}@${change.version} - License: ${change.license || 'Unknown'}\n`
+        output += `• ${change.name}@${change.version} - License: ${change.license || 'Unknown'} (Forbidden)\n`
+      }
+    }
+
+    if (results.invalidLicenseChanges.unresolved.length > 0) {
+      output += '\n⚠️ Invalid SPDX License Expressions:\n'
+      for (const change of results.invalidLicenseChanges.unresolved) {
+        output += `• ${change.name}@${change.version} - License: ${change.license || 'Unknown'} (Invalid SPDX)\n`
       }
     }
 
