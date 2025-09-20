@@ -1,7 +1,7 @@
 import type { ComparisonResponse, ReviewResults } from './types.js'
 
 export class OutputFormatter {
-  constructor(private outputFormat: 'json' | 'table' | 'summary') {}
+  constructor(private outputFormat: 'json' | 'table' | 'markdown' | 'summary') {}
 
   format(results: ReviewResults, comparison: ComparisonResponse): string {
     switch (this.outputFormat) {
@@ -9,7 +9,10 @@ export class OutputFormatter {
         return this.formatJson(results, comparison)
       case 'table':
         return this.formatTable(results)
+      case 'markdown':
+        return this.formatMarkdown(results, comparison)
       case 'summary':
+        return this.formatSummary(results, comparison)
       default:
         return this.formatSummary(results, comparison)
     }
@@ -81,7 +84,7 @@ export class OutputFormatter {
     return output
   }
 
-  private formatSummary(results: ReviewResults, comparison: ComparisonResponse): string {
+  private formatMarkdown(results: ReviewResults, comparison: ComparisonResponse): string {
     let output = ''
 
     const status = results.hasIssues ? '❌ Issues Found' : '✅ All Clear'
@@ -212,6 +215,140 @@ export class OutputFormatter {
       output += `- Review and address critical security vulnerabilities\n`
       output += `- Check license compatibility with your project\n`
       output += `- Consider alternatives for packages with very low security scores\n`
+    }
+
+    return output
+  }
+
+  private formatSummary(results: ReviewResults, comparison: ComparisonResponse): string {
+    let output = ''
+
+    const status = results.hasIssues ? '❌ Issues Found' : '✅ All Clear'
+    const statusIcon = results.hasIssues ? '❌' : '✅'
+
+    output += `\n🔍 Dependency Review Results\n`
+    output += `${statusIcon} ${status}\n`
+    output += `📊 ${results.summary.added} dependencies added • ${results.summary.removed} removed`
+
+    if (results.summary.vulnerabilities > 0) {
+      const vulnText = results.summary.vulnerabilities === 1 ? 'vulnerability' : 'vulnerabilities'
+      const vulnDetails = []
+
+      if (results.summary.criticalVulns > 0) {
+        vulnDetails.push(`${results.summary.criticalVulns} critical`)
+      }
+      if (results.summary.highVulns > 0) {
+        vulnDetails.push(`${results.summary.highVulns} high`)
+      }
+      if (results.summary.moderateVulns > 0) {
+        vulnDetails.push(`${results.summary.moderateVulns} moderate`)
+      }
+      if (results.summary.lowVulns > 0) {
+        vulnDetails.push(`${results.summary.lowVulns} low`)
+      }
+
+      output += ` • 🚨 ${results.summary.vulnerabilities} ${vulnText} (${vulnDetails.join(', ')})`
+    }
+    output += '\n'
+
+    const criticalIssues = this.getCriticalIssues(results)
+    if (criticalIssues.length > 0) {
+      output += '\n🚨 Critical Issues\n'
+      for (const issue of criticalIssues) {
+        output += `  ${issue.type} ${issue.package} - ${issue.details}\n`
+      }
+    }
+
+    if (results.vulnerableChanges.length > 0) {
+      const vulnsByPackage = this.groupVulnerabilitiesByPackage(results.vulnerableChanges)
+
+      output += '\n🛡️ Security Vulnerabilities\n'
+      output += `${Object.keys(vulnsByPackage).length} packages with vulnerabilities:\n`
+
+      for (const [packageName, data] of Object.entries(vulnsByPackage)) {
+        const highestSeverity = this.getHighestSeverity(data.vulnerabilities)
+        const severityIcon = this.getSeverityIcon(highestSeverity)
+
+        output += `  ${severityIcon} ${packageName}@${data.version} - ${data.vulnerabilities.length} ${data.vulnerabilities.length === 1 ? 'vulnerability' : 'vulnerabilities'}\n`
+
+        for (const vuln of data.vulnerabilities) {
+          output += `    ${vuln.severity.toUpperCase()}: ${vuln.advisory_summary}\n`
+          output += `    📋 ${vuln.advisory_ghsa_id}\n`
+        }
+      }
+    }
+
+    if (results.invalidLicenseChanges.forbidden.length > 0 ||
+        results.invalidLicenseChanges.unresolved.length > 0 ||
+        results.invalidLicenseChanges.unlicensed.length > 0) {
+
+      output += '\n⚖️ License Issues\n'
+
+      if (results.invalidLicenseChanges.forbidden.length > 0) {
+        output += `  Forbidden licenses:\n`
+        for (const change of results.invalidLicenseChanges.forbidden) {
+          output += `    ${change.name}@${change.version} (${change.license})\n`
+        }
+      }
+
+      if (results.invalidLicenseChanges.unresolved.length > 0) {
+        output += `  Invalid SPDX expressions:\n`
+        for (const change of results.invalidLicenseChanges.unresolved) {
+          output += `    ${change.name}@${change.version} (${change.license || 'Unknown'})\n`
+        }
+      }
+
+      if (results.invalidLicenseChanges.unlicensed.length > 0) {
+        output += `  Unknown licenses:\n`
+        for (const change of results.invalidLicenseChanges.unlicensed) {
+          output += `    ${change.name}@${change.version}\n`
+        }
+      }
+    }
+
+    if (results.deniedChanges.length > 0) {
+      output += '\n🚫 Denied Dependencies\n'
+      for (const change of results.deniedChanges) {
+        output += `  ${change.name}@${change.version}\n`
+      }
+    }
+
+    if (results.scorecard && results.scorecard.dependencies.length > 0) {
+      const lowScorePackages = results.scorecard.dependencies
+        .filter(entry => entry.scorecard && entry.scorecard.score !== undefined && entry.scorecard.score < 5)
+
+      if (lowScorePackages.length > 0) {
+        output += '\n📊 Security Score Concerns\n'
+        output += `${lowScorePackages.length} packages with low security scores (< 5.0/10):\n`
+
+        const ranges = {
+          '0-2': lowScorePackages.filter(p => p.scorecard.score < 2),
+          '2-3': lowScorePackages.filter(p => p.scorecard.score >= 2 && p.scorecard.score < 3),
+          '3-4': lowScorePackages.filter(p => p.scorecard.score >= 3 && p.scorecard.score < 4),
+          '4-5': lowScorePackages.filter(p => p.scorecard.score >= 4 && p.scorecard.score < 5)
+        }
+
+        for (const [range, packages] of Object.entries(ranges)) {
+          if (packages.length > 0) {
+            output += `  Score ${range}:\n`
+            for (const entry of packages) {
+              output += `    ${entry.change.name}@${entry.change.version} (${entry.scorecard.score}/10)\n`
+            }
+          }
+        }
+      }
+    }
+
+    if (comparison.snapshot_warnings) {
+      output += '\n⚠️ Snapshot Warnings\n'
+      output += `${comparison.snapshot_warnings}\n`
+    }
+
+    if (results.hasIssues) {
+      output += '\n📝 Next Steps:\n'
+      output += '  • Review and address critical security vulnerabilities\n'
+      output += '  • Check license compatibility with your project\n'
+      output += '  • Consider alternatives for packages with very low security scores\n'
     }
 
     return output

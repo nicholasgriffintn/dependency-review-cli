@@ -33,7 +33,7 @@ export class PrCommenter {
       return
     }
 
-    const formatter = new OutputFormatter('summary')
+    const formatter = new OutputFormatter('markdown')
     const content = formatter.format(results, comparison)
     
     const commentBody = `${this.commentMarker}\n${content}`
