@@ -140,21 +140,21 @@ describe('OutputFormatter', () => {
     
     const output = formatter.format(results, mockComparison)
 
-    assert(output.includes('## 🔍 Dependency Review Results'))
+    assert(output.includes('🔍 Dependency Review Results'))
     assert(output.includes('❌ Issues Found'))
     assert(output.includes('1 dependencies added'))
-    assert(output.includes('1 vulnerabilities'))
+    assert(output.includes('🚨 1 vulnerability'))
     assert(output.includes('1 critical'))
-    assert(output.includes('### 🚨 Critical Issues'))
+    assert(output.includes('🚨 Critical Issues'))
     assert(output.includes('🔴 CRITICAL'))
     assert(output.includes('bad-package@2.0.0'))
     assert(output.includes('1 critical vulnerability'))
-    assert(output.includes('### 🛡️ Security Vulnerabilities'))
-    assert(output.includes('1 packages with vulnerabilities'))
+    assert(output.includes('🛡️ Security Vulnerabilities'))
+    assert(output.includes('1 packages with vulnerabilities:'))
     assert(output.includes('🔴 bad-package@2.0.0'))
-    assert(output.includes('**CRITICAL**: Critical security flaw'))
-    assert(output.includes('[GHSA-crit-5678]'))
-    assert(output.includes('**Next Steps:**'))
+    assert(output.includes('CRITICAL: Critical security flaw'))
+    assert(output.includes('📋 GHSA-crit-5678'))
+    assert(output.includes('📝 Next Steps:'))
   })
 
   it('should format summary output with license issues', () => {
@@ -181,16 +181,16 @@ describe('OutputFormatter', () => {
     
     const output = formatter.format(results, mockComparison)
 
-    assert(output.includes('### 🚨 Critical Issues'))
+    assert(output.includes('🚨 Critical Issues'))
     assert(output.includes('⚖️ LICENSE'))
     assert(output.includes('licensed-pkg@1.0.0'))
     assert(output.includes('Forbidden license: GPL-3.0'))
-    assert(output.includes('### ⚖️ License Issues'))
-    assert(output.includes('**Forbidden licenses:**'))
+    assert(output.includes('⚖️ License Issues'))
+    assert(output.includes('Forbidden licenses:'))
     assert(output.includes('licensed-pkg@1.0.0 (GPL-3.0)'))
-    assert(output.includes('**Invalid SPDX expressions:**'))
+    assert(output.includes('Invalid SPDX expressions:'))
     assert(output.includes('bad-spdx-pkg@1.0.0 (Invalid-License)'))
-    assert(output.includes('**Unknown licenses:**'))
+    assert(output.includes('Unknown licenses:'))
     assert(output.includes('no-license-pkg@1.0.0'))
   })
 
@@ -206,11 +206,11 @@ describe('OutputFormatter', () => {
     
     const output = formatter.format(results, mockComparison)
 
-    assert(output.includes('### 🚨 Critical Issues'))
+    assert(output.includes('🚨 Critical Issues'))
     assert(output.includes('🚫 DENIED'))
     assert(output.includes('denied-pkg@1.0.0'))
     assert(output.includes('Package is explicitly denied'))
-    assert(output.includes('### 🚫 Denied Dependencies'))
+    assert(output.includes('🚫 Denied Dependencies'))
     assert(output.includes('denied-pkg@1.0.0'))
   })
 
@@ -220,7 +220,7 @@ describe('OutputFormatter', () => {
     
     const output = formatter.format(results, mockComparison)
 
-    assert(output.includes('## 🔍 Dependency Review Results'))
+    assert(output.includes('🔍 Dependency Review Results'))
     assert(output.includes('✅ All Clear'))
     assert(output.includes('1 dependencies added'))
     assert(output.includes('0 removed'))
@@ -239,7 +239,7 @@ describe('OutputFormatter', () => {
     
     const output = formatter.format(results, comparisonWithWarnings)
 
-    assert(output.includes('### ⚠️ Snapshot Warnings'))
+    assert(output.includes('⚠️ Snapshot Warnings'))
     assert(output.includes('Warning: Some packages may not have complete data'))
   })
 
@@ -262,12 +262,12 @@ describe('OutputFormatter', () => {
     
     const output = formatter.format(results, mockComparison)
 
-    assert(output.includes('### 📊 Security Score Concerns'))
+    assert(output.includes('📊 Security Score Concerns'))
     assert(output.includes('2 packages with low security scores'))
     assert(output.includes('< 5.0/10'))
-    assert(output.includes('**Score 0-2:**'))
+    assert(output.includes('Score 0-2:'))
     assert(output.includes('very-bad-pkg@1.5.0 (1.2/10)'))
-    assert(output.includes('**Score 3-4:**'))
+    assert(output.includes('Score 3-4:'))
     assert(output.includes('test-pkg@1.0.0 (3.5/10)'))
     assert(!output.includes('good-pkg@2.0.0'))
     assert(!output.includes('8.2/10'))
@@ -335,7 +335,7 @@ describe('OutputFormatter', () => {
     
     assert(output.includes('🟠 vulnerable-pkg@1.0.0'))
     assert(output.includes('1 vulnerability'))
-    assert(output.includes('**HIGH**: Test vulnerability'))
+    assert(output.includes('HIGH: Test vulnerability'))
   })
 
   it('should handle multiple vulnerabilities in same package', () => {
@@ -368,14 +368,70 @@ describe('OutputFormatter', () => {
         highVulns: 1
       }
     })
-    
+
     const output = formatter.format(results, mockComparison)
 
     assert(output.includes('🔴 multi-vuln-pkg@2.0.0'))
     assert(output.includes('2 vulnerabilities'))
-    assert(output.includes('**CRITICAL**: Critical issue 1'))
-    assert(output.includes('**HIGH**: High severity issue'))
+    assert(output.includes('CRITICAL: Critical issue 1'))
+    assert(output.includes('HIGH: High severity issue'))
     assert(output.includes('GHSA-crit-1'))
     assert(output.includes('GHSA-high-1'))
+  })
+
+  it('should format CLI summary output with critical vulnerability', () => {
+    const formatter = new OutputFormatter('summary')
+    const results = createMockResults({
+      hasIssues: true,
+      vulnerableChanges: [{
+        manifest: 'package.json',
+        name: 'bad-package',
+        version: '2.0.0',
+        vulnerabilities: [{
+          severity: 'critical',
+          advisory_ghsa_id: 'GHSA-crit-5678',
+          advisory_summary: 'Critical security flaw',
+          advisory_url: 'https://github.com/advisories/GHSA-crit-5678'
+        }]
+      }],
+      summary: {
+        ...createMockResults().summary,
+        vulnerabilities: 1,
+        criticalVulns: 1
+      }
+    })
+
+    const output = formatter.format(results, mockComparison)
+
+    assert(output.includes('🔍 Dependency Review Results'))
+    assert(output.includes('❌ Issues Found'))
+    assert(output.includes('1 dependencies added'))
+    assert(output.includes('0 removed'))
+    assert(output.includes('🚨 1 vulnerability (1 critical)'))
+    assert(output.includes('🚨 Critical Issues'))
+    assert(output.includes('🔴 CRITICAL'))
+    assert(output.includes('bad-package@2.0.0'))
+    assert(output.includes('1 critical vulnerability'))
+    assert(output.includes('🛡️ Security Vulnerabilities'))
+    assert(output.includes('1 packages with vulnerabilities:'))
+    assert(output.includes('🔴 bad-package@2.0.0'))
+    assert(output.includes('CRITICAL: Critical security flaw'))
+    assert(output.includes('📋 GHSA-crit-5678'))
+    assert(output.includes('📝 Next Steps:'))
+  })
+
+  it('should format CLI summary output without issues', () => {
+    const formatter = new OutputFormatter('summary')
+    const results = createMockResults()
+
+    const output = formatter.format(results, mockComparison)
+
+    assert(output.includes('🔍 Dependency Review Results'))
+    assert(output.includes('✅ All Clear'))
+    assert(output.includes('1 dependencies added'))
+    assert(output.includes('0 removed'))
+    assert(!output.includes('vulnerabilities'))
+    assert(!output.includes('Critical Issues'))
+    assert(!output.includes('Next Steps'))
   })
 })
