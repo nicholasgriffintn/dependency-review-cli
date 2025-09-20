@@ -1,38 +1,43 @@
 # Dependency Review CLI
 
-A standalone CLI tool for reviewing dependency changes and vulnerabilities using the GitHub API. This tool provides the similar functionality to the [dependency-review-action](https://github.com/actions/dependency-review-action) but can be run locally or in any CI/CD environment through a CLI.
+The aim of this repo is to provide a standalone CLI tool that largely does a similar job to the [dependency-review-action](https://github.com/actions/dependency-review-action) but can be run locally or in any CI/CD environment through a CLI.
 
-## Features
+It also aims to expand some of the functionality where it makes sense to do so.
 
-- 🔍 **Vulnerability Detection**: Retrieves known security vulnerabilities in dependencies.
-- ⚖️ **License Compliance**: Check license compatibility and restrictions (Please note that by default, we have set a list of common copyleft licenses you can override this in the config file).
-- 🚫 **Package Restrictions**: Block specific packages or namespaces.
-- 📊 **Multiple Output Formats**: JSON, table, or summary formats,
-- 🎯 **Flexible Configuration**: Configure via CLI options or config files,
-- 🔍 **OpenSSF Scorecard**: Retrieves the OpenSSF Scorecard for the dependencies,
-- 🚀 **GitHub Integration**: Uses the same GitHub Dependency Graph API as the official action, and supports PR commenting.
+Currently, it is capable of:
+
+- Retrieving your dependency review results from the [GitHub Dependency Graph API](https://docs.github.com/en/rest/dependency-graph/dependency-review?apiVersion=2022-11-28).
+- Checking the dependencies returned to ensure they do not contain any vulnerabilities, invalid licenses, or restricted packages.
+- Erroring at configurable levels of severity (low, moderate, high, critical).
+- Erroring if there are any licenses that are not compatible with the licenses you have allowed.
+- Retrieving the OpenSSF Scorecard for the dependencies.
+- Optionally commenting on a GitHub PR with the results.
 
 ## Installation
 
-### Global Installation
+You can use the following commands to install the CLI (pnpm is not required, just swap that out for your package manager of choice):
 
 ```bash
+# Install globally
 pnpm add -g dependency-review-cli
-```
 
-### Project Installation
-
-```bash
+# Install locally
 pnpm add -D dependency-review-cli
 ```
 
-### Run with pnpx
+### Run without installation
 
 ```bash
+# PNPX
 pnpx dependency-review-cli <owner> <repo> <base-ref> <head-ref>
+
+# NPM
+npx dependency-review-cli <owner> <repo> <base-ref> <head-ref>
 ```
 
-## Authentication
+## Usage
+
+### Set your GitHub token
 
 The tool requires a GitHub token to access the Dependency Graph API. Set the `GITHUB_TOKEN` environment variable:
 
@@ -45,7 +50,8 @@ The token needs:
 
 You can find out more about the permissions required for the token [here](https://docs.github.com/en/rest/dependency-graph/dependency-review?apiVersion=2022-11-28#get-a-diff-of-the-dependencies-between-commits).
 
-## Usage
+For PR commenting, the token also needs:
+- "Pull requests" repository permissions (write)
 
 ### Basic Usage
 
@@ -60,29 +66,29 @@ dependency-review myorg myrepo main feature-branch
 dependency-review myorg myrepo v1.0.0 HEAD
 ```
 
-## Examples
+Here are some more examples that you can run:
 
-### Check PR Changes
+#### Check PR Changes
 
 ```bash
 # Check changes in a pull request
-dependency-review myorg myrepo main pr-branch
+pnpx dependency-review-cli nicholasgriffintn dependency-review-cli main this-pr-should-fail
 
 # Only check critical and high severity vulnerabilities
-dependency-review --fail-on-severity high myorg myrepo main pr-branch
+pnpx dependency-review-cli --fail-on-severity high nicholasgriffintn dependency-review-cli main this-pr-should-fail
 
 # Get JSON output for further processing
-dependency-review --output json myorg myrepo main pr-branch > review.json
+pnpx dependency-review-cli --output json nicholasgriffintn dependency-review-cli main this-pr-should-fail > review.json
 ```
 
-### License Checking
+#### License Checking
 
 ```bash
 # Allow only specific licenses
-dependency-review --config license-config.yml owner repo main HEAD
+pnpx dependency-review-cli --config license-config.yml nicholasgriffintn dependency-review-cli main this-pr-should-fail
 
 # Disable license checking entirely
-dependency-review --no-license-check owner repo main HEAD
+pnpx dependency-review-cli --no-license-check nicholasgriffintn dependency-review-cli main this-pr-should-fail
 ```
 
 ### CLI Options
@@ -95,30 +101,23 @@ dependency-review --help
 
 ### Output Formats
 
-#### Summary (default)
-Human-readable summary with color-coded results:
-
 ```bash
+# Summary - default
 dependency-review owner repo main HEAD
-```
 
-#### Table
-Structured table format:
+# Markdown
+dependency-review --output markdown owner repo main HEAD
 
-```bash
+# Table
 dependency-review --output table owner repo main HEAD
-```
 
-#### JSON
-Machine-readable JSON for integration:
-
-```bash
+# JSON
 dependency-review --output json owner repo main HEAD
 ```
 
 ## Configuration
 
-### Configuration File
+### Using a
 
 Create a `.dependency-review.yml` file:
 
@@ -160,7 +159,7 @@ dependency-review --config .dependency-review.yml owner repo main HEAD
 ### Environment Variables
 
 - `GITHUB_TOKEN` - GitHub personal access token (required)
-- `GITHUB_API_URL` - GitHub API URL (for GitHub Enterprise)
+- `GITHUB_API_URL` - An optional GitHub API URL (for GitHub Enterprise)
 
 ### CI/CD Integration
 
