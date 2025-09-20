@@ -1,6 +1,6 @@
 {
   "name": "dependency-review-cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A CLI tool for reviewing dependency changes and vulnerabilities using the GitHub API",
   "license": "Apache-2.0",
   "author": "Nicholas Griffin",
