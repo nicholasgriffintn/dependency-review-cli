@@ -6,7 +6,7 @@
   "author": "Nicholas Griffin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nicholasgriffintn/dependency-review-cli"
+    "url": "git+https://github.com/nicholasgriffintn/dependency-review-cli.git"
   },
   "keywords": [
     "dependency-review",
