@@ -89,7 +89,7 @@ export interface Config {
 		allow?: string[];
 	};
 	/**
-	 * The licenses that will cause the command to fail
+	 * Define packages here that should be excluded from the license check
 	 * @default undefined
 	 */
 	licenseCheckExclusions?: string[];
