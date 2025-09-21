@@ -88,21 +88,19 @@ export class ConfigLoader {
 
       const data = YAML.parse(content)
 
-      const converted = this.convertConfigKeys(data)
-
-      return converted
+      return this.convertConfigKeys(data) as Partial<Config>
     } catch (error) {
       throw new Error(`Failed to load config file: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
-  private convertConfigKeys(obj: any): any {
-    if (obj === null || typeof obj !== 'object') {
-      return obj
-    }
+  private isConfigObject(obj: unknown): obj is Partial<Config> {
+    return obj !== null && typeof obj === 'object' && !Array.isArray(obj)
+  }
 
-    if (Array.isArray(obj)) {
-      return obj
+  private convertConfigKeys(obj: unknown): Record<string, unknown> {
+    if (!this.isConfigObject(obj)) {
+      return {}
     }
 
     const result: Record<string, unknown> = {}

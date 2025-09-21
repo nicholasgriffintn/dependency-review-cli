@@ -25,6 +25,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/cli.js",
+    "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test test/*.test.js",
     "test:watch": "node --loader tsx --test --watch test/*.test.js",
     "prepare": "pnpm run build"
