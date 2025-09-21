@@ -55,7 +55,7 @@ export class ConfigLoader {
     ghsas: {
       allow: []
     },
-    licenseCheckExclusions: [],
+    licenseCheckExclusions: undefined,
     licenseCheck: true,
     vulnerabilityCheck: true,
     warnOnly: false,
