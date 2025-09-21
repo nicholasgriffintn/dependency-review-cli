@@ -1,0 +1,28 @@
+name: Publish Package to npmjs
+on:
+  release:
+    types: [published]
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: pnpm audit
+      - name: Update npm (TODO Once node includes 11.5.1 by default, we can remove this step)
+        run: npm install -g npm@11.5.1
+      - run: pnpm install --frozen-lockfile
+      - run: npm publish

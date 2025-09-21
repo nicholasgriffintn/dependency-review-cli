@@ -40,10 +40,11 @@ describe('ConfigLoader', () => {
   it('should validate mutually exclusive license options', async () => {
     const configContent = `
 fail-on-severity: moderate
-allow-licenses:
-  - MIT
-deny-licenses:
-  - GPL-3.0
+licenses:
+  allow:
+    - MIT
+  deny:
+    - GPL-3.0
 `
     const configPath = path.join(process.cwd(), 'test-config.yml')
     fs.writeFileSync(configPath, configContent)
@@ -54,11 +55,11 @@ deny-licenses:
         loader.load({
           owner: 'test',
           repo: 'test',
-          baseRef: 'main', 
+          baseRef: 'main',
           headRef: 'HEAD',
           config: configPath
         }),
-        /Cannot specify both allow-licenses and deny-licenses/
+        /Cannot specify both allow and deny licenses/
       )
     } finally {
       fs.unlinkSync(configPath)
@@ -93,13 +94,16 @@ vulnerability-check: false
   it('should load valid config file', async () => {
     const configContent = `
 fail-on-severity: high
-deny-licenses: []
-allow-licenses:
-  - MIT
-  - Apache-2.0
-deny-packages:
-  - pkg:npm/lodash@4.17.20
+licenses:
+  allow:
+    - MIT
+    - Apache-2.0
+packages:
+  deny:
+    - pkg:npm/lodash@4.17.20
 warn-only: true
+license-check: true
+vulnerability-check: true
 `
     const configPath = path.join(process.cwd(), 'test-config-valid.yml')
     fs.writeFileSync(configPath, configContent)
@@ -115,8 +119,8 @@ warn-only: true
       })
 
       assert.strictEqual(config.failOnSeverity, 'high')
-      assert.deepStrictEqual(config.allowLicenses, ['MIT', 'Apache-2.0'])
-      assert.deepStrictEqual(config.denyPackages, ['pkg:npm/lodash@4.17.20'])
+      assert.deepStrictEqual(config.licenses?.allow, ['MIT', 'Apache-2.0'])
+      assert.deepStrictEqual(config.packages?.deny, ['pkg:npm/lodash@4.17.20'])
       assert.strictEqual(config.warnOnly, true)
     } finally {
       fs.unlinkSync(configPath)

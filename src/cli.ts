@@ -22,7 +22,7 @@ program
   .argument('<base-ref>', 'Base git reference (commit SHA, branch, or tag)')
   .argument('<head-ref>', 'Head git reference (commit SHA, branch, or tag)')
   .option('-c, --config <path>', 'Path to configuration file')
-  .option('-o, --output <format>', 'Output format (json, table, summary)', 'summary')
+  .option('-o, --output <format>', 'Output format (json, table, markdown, summary)', 'summary')
   .option('--fail-on-severity <severity>', 'Fail on vulnerability severity (low, moderate, high, critical)', 'low')
   .option('--warn-only', 'Only warn, never fail the command')
   .option('--no-license-check', 'Disable license checking')

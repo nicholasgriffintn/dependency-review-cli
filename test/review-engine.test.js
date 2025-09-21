@@ -6,12 +6,20 @@ import { ReviewEngine } from '../src/review-engine.js'
 const mockConfig = {
   failOnSeverity: 'low',
   failOnScopes: ['runtime'],
-  allowLicenses: undefined,
-  denyLicenses: undefined,
-  allowDependenciesLicenses: undefined,
-  allowGhsas: [],
-  denyPackages: [],
-  denyGroups: [],
+  licenses: {
+    allow: undefined,
+    deny: undefined
+  },
+  packages: {
+    deny: []
+  },
+  groups: {
+    deny: []
+  },
+  ghsas: {
+    allow: []
+  },
+  licenseCheckExclusions: undefined,
   licenseCheck: true,
   vulnerabilityCheck: true,
   warnOnly: false,
@@ -102,9 +110,12 @@ describe('ReviewEngine', () => {
       license: 'GPL-3.0'
     })
 
-    const configWithAllowList = { 
-      ...mockConfig, 
-      allowLicenses: ['MIT', 'Apache-2.0'] 
+    const configWithAllowList = {
+      ...mockConfig,
+      licenses: {
+        ...mockConfig.licenses,
+        allow: ['MIT', 'Apache-2.0']
+      }
     }
     const engine = new ReviewEngine(configWithAllowList)
     const comparison = {
@@ -144,7 +155,10 @@ describe('ReviewEngine', () => {
 
     const configWithDeniedPackages = {
       ...mockConfig,
-      denyPackages: ['banned-package']
+      packages: {
+        ...mockConfig.packages,
+        deny: ['banned-package']
+      }
     }
     const engine = new ReviewEngine(configWithDeniedPackages)
     const comparison = {
@@ -190,8 +204,11 @@ describe('ReviewEngine', () => {
 
     const configWithExclusions = {
       ...mockConfig,
-      allowLicenses: ['MIT'],
-      allowDependenciesLicenses: ['pkg:npm/excluded-package']
+      licenses: {
+        ...mockConfig.licenses,
+        allow: ['MIT']
+      },
+      licenseCheckExclusions: ['pkg:npm/excluded-package']
     }
     const engine = new ReviewEngine(configWithExclusions)
     const comparison = {
