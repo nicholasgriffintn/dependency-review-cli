@@ -7,6 +7,7 @@ import { ReviewEngine } from "./review-engine.js";
 import { OutputFormatter } from "./output-formatter.js";
 import { ConfigLoader } from "./config-loader.js";
 import { PrCommenter } from "./pr-comment.js";
+import { logger } from "./utils/logger.js";
 import type { CliOptions, ReviewResults } from "./types.js";
 
 const program = new Command();
@@ -37,6 +38,7 @@ program
 	.option("--warn-only", "Only warn, never fail the command")
 	.option("--no-license-check", "Disable license checking")
 	.option("--no-vulnerability-check", "Disable vulnerability checking")
+	.option("--quiet", "Suppress log messages, only show output")
 	.option(
 		"--comment-summary-in-pr <mode>",
 		"Comment summary in PR (always, on-failure, never)",
@@ -44,8 +46,6 @@ program
 	)
 	.option("--pr-number <number>", "Pull request number for commenting")
 	.action(async (owner, repo, baseRef, headRef, options) => {
-		console.log("Initializing dependency review...");
-
 		try {
 			const cliOptions: CliOptions = {
 				owner,
@@ -56,19 +56,20 @@ program
 				output: options.output,
 				failOnSeverity: options.failOnSeverity,
 				warnOnly: options.warnOnly,
+				quiet: options.quiet,
 				commentSummaryInPr: options.commentSummaryInPr,
-				prNumber: options.prNumber ? parseInt(options.prNumber) : undefined,
+				prNumber: options.prNumber ? Number.parseInt(options.prNumber) : undefined,
 			};
 
-			console.log("Loading configuration...");
+			logger(cliOptions, "Initializing dependency review config...");
 			const configLoader = new ConfigLoader();
 			const config = await configLoader.load(cliOptions);
 
-			console.log("Connecting to GitHub...");
+			logger(cliOptions, "Connecting to GitHub...");
 			const githubClient = new GitHubClient();
 			await githubClient.getRepository(owner, repo);
 
-			console.log("Comparing dependency changes...");
+			logger(cliOptions, "Comparing dependency changes...");
 			const comparison = await githubClient.compareDependencies({
 				owner,
 				repo,
@@ -80,11 +81,11 @@ program
 			const hasChanges = comparison.changes && comparison.changes.length > 0;
 
 			if (hasChanges) {
-				console.log("Analyzing dependencies...");
+				logger(cliOptions, "Analyzing dependencies...");
 				const reviewEngine = new ReviewEngine(config);
 				results = await reviewEngine.analyze(comparison);
 			} else {
-				console.log("✅ No dependency changes found.");
+				logger(cliOptions, "✅ No dependency changes found.");
 
 				results = {
 					vulnerableChanges: [],
@@ -119,7 +120,7 @@ program
 				cliOptions.commentSummaryInPr !== "never" &&
 				cliOptions.prNumber
 			) {
-				console.log("Adding comment to PR...");
+				logger(cliOptions, "Adding comment to PR...");
 				const commenter = new PrCommenter();
 				await commenter.commentOnPr(
 					{
@@ -134,7 +135,7 @@ program
 					results,
 					comparison,
 				);
-				console.log("✅ PR comment updated");
+				logger(cliOptions, "✅ PR comment updated");
 			}
 
 			if (results.hasIssues && !config.warnOnly) {

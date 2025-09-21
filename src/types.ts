@@ -46,6 +46,11 @@ export interface CliOptions {
 	 * The number of the PR to comment the summary in
 	 */
 	prNumber?: number;
+	/**
+	 * Whether to suppress log messages and only show the output
+	 * @default false
+	 */
+	quiet?: boolean;
 }
 
 export interface Config {

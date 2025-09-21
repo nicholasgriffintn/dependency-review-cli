@@ -77,8 +77,8 @@ pnpx dependency-review-cli nicholasgriffintn dependency-review-cli main this-pr-
 # Only check critical and high severity vulnerabilities
 pnpx dependency-review-cli --fail-on-severity high nicholasgriffintn dependency-review-cli main this-pr-should-fail
 
-# Get JSON output for further processing
-pnpx dependency-review-cli --output json nicholasgriffintn dependency-review-cli main this-pr-should-fail > review.json
+# Get clean JSON output for further processing
+pnpx dependency-review-cli --quiet --output json nicholasgriffintn dependency-review-cli main this-pr-should-fail > review.json
 ```
 
 #### License Checking
