@@ -1,8 +1,8 @@
 // Copied from https://github.com/actions/dependency-review-action/blob/main/src/spdx.ts
 
-import * as spdxlib from '@onebeyond/spdx-license-satisfies'
-import spdxSatisfies from 'spdx-satisfies'
-import parse from 'spdx-expression-parse'
+import * as spdxlib from "@onebeyond/spdx-license-satisfies";
+import spdxSatisfies from "spdx-satisfies";
+import parse from "spdx-expression-parse";
 
 /*
  * NOTE: spdx-license-satisfies methods depend on spdx-expression-parse
@@ -11,55 +11,78 @@ import parse from 'spdx-expression-parse'
  * you should pre-screen inputs to the satisfies* methods using isValid
  */
 
+/**
+ * Check if an SPDX expression is valid
+ * @param candidateExpr - The SPDX expression to check
+ * @returns True if the SPDX expression is valid
+ */
 export function isValid(candidateExpr: string): boolean {
-  try {
-    parse(candidateExpr)
-    return true
-  } catch (_) {
-    return false
-  }
+	try {
+		parse(candidateExpr);
+		return true;
+	} catch (_) {
+		return false;
+	}
 }
 
-// accepts an SPDX expression and a non-empty list of licenses (not expressions)
+/**
+ * Check if an SPDX expression satisfies any of the licenses
+ * @param candidateExpr - The SPDX expression to check
+ * @param licenses - The licenses to check
+ * @returns True if the SPDX expression satisfies any of the licenses
+ */
 export function satisfiesAny(
-  candidateExpr: string,
-  licenses: string[]
+	candidateExpr: string,
+	licenses: string[],
 ): boolean {
-  candidateExpr = cleanInvalidSPDX(candidateExpr)
-  try {
-    return spdxlib.satisfiesAny(candidateExpr, licenses)
-  } catch (_) {
-    return false
-  }
+	candidateExpr = cleanInvalidSPDX(candidateExpr);
+	try {
+		return spdxlib.satisfiesAny(candidateExpr, licenses);
+	} catch (_) {
+		return false;
+	}
 }
 
-// accepts an SPDX expression and a non-empty list of licenses (not expressions)
+/**
+ * Check if an SPDX expression satisfies all of the licenses
+ * @param candidateExpr - The SPDX expression to check
+ * @param licenses - The licenses to check
+ * @returns True if the SPDX expression satisfies all of the licenses
+ */
 export function satisfiesAll(
-  candidateExpr: string,
-  licenses: string[]
+	candidateExpr: string,
+	licenses: string[],
 ): boolean {
-  candidateExpr = cleanInvalidSPDX(candidateExpr)
-  try {
-    return spdxlib.satisfiesAll(candidateExpr, licenses)
-  } catch (_) {
-    return false
-  }
+	candidateExpr = cleanInvalidSPDX(candidateExpr);
+	try {
+		return spdxlib.satisfiesAll(candidateExpr, licenses);
+	} catch (_) {
+		return false;
+	}
 }
 
-// simple pass-through for the underlying spdx-satisfies method
+/**
+ * Check if an SPDX expression satisfies a range
+ * @param candidateExpr - The SPDX expression to check
+ * @param range - The range to check
+ * @returns True if the SPDX expression satisfies the range
+ */
 export function satisfies(candidateExpr: string, range: string): boolean {
-  candidateExpr = cleanInvalidSPDX(candidateExpr)
-  try {
-    return spdxSatisfies(candidateExpr, range)
-  } catch (_) {
-    return false
-  }
+	candidateExpr = cleanInvalidSPDX(candidateExpr);
+	try {
+		return spdxSatisfies(candidateExpr, range);
+	} catch (_) {
+		return false;
+	}
 }
 
-const replaceOtherRegex = /(?<![\w-])OTHER(?![\w-])/g
-
-// adjusts license expressions to not include the invalid `OTHER`
-// which ClearlyDefined adds to license strings
+/**
+ * Clean an SPDX expression to not include the invalid `OTHER`
+ * @param spdxExpr - The SPDX expression to clean
+ * @returns The cleaned SPDX expression
+ */
 export function cleanInvalidSPDX(spdxExpr: string): string {
-  return spdxExpr.replace(replaceOtherRegex, 'LicenseRef-clearlydefined-OTHER')
+	const replaceOtherRegex = /(?<![\w-])OTHER(?![\w-])/g;
+
+	return spdxExpr.replace(replaceOtherRegex, "LicenseRef-clearlydefined-OTHER");
 }
