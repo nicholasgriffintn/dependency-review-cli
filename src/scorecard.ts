@@ -110,10 +110,9 @@ export class ScorecardService {
 	): Promise<ScorecardResponse | null> {
 		try {
 			return await getScorecard(repositoryUrl);
-		} catch (error) {
-			console.debug(
-				`Error querying scorecard: ${error instanceof Error ? error.message : String(error)}`,
-			);
+		} catch (error: unknown) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
+			console.error(`Error fetching scorecard for ${repositoryUrl} ${errorMessage}`);
 			return null;
 		}
 	}
@@ -148,7 +147,6 @@ async function getScorecard(
 	if (response.ok) {
 		return (await response.json()) as ScorecardResponse;
 	} else {
-		console.debug(`Couldn't get scorecard data for ${repositoryUrl}`);
 		return null;
 	}
 }
@@ -165,8 +163,6 @@ async function getProjectUrl(
 	packageName: string,
 	version: string,
 ): Promise<string> {
-	console.debug(`Getting deps.dev data for ${packageName} ${version}`);
-
 	const depsDevAPIRoot = "https://api.deps.dev";
 	const url = `${depsDevAPIRoot}/v3/systems/${ecosystem}/packages/${packageName}/versions/${version}`;
 
@@ -180,8 +176,8 @@ async function getProjectUrl(
 				return data.relatedProjects[0].projectKey.id;
 			}
 		}
-	} catch (error) {
-		console.debug(`Error getting project URL from deps.dev: ${error}`);
+	} catch (_error) {
+		// Ignore
 	}
 
 	return "";
