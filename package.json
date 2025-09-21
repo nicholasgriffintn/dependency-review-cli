@@ -1,6 +1,6 @@
 {
   "name": "dependency-review-cli",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "A CLI tool for reviewing dependency changes and vulnerabilities using the GitHub API",
   "license": "Apache-2.0",
   "author": "Nicholas Griffin",
@@ -25,6 +25,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/cli.js",
+    "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test test/*.test.js",
     "test:watch": "node --loader tsx --test --watch test/*.test.js",
     "prepare": "pnpm run build"

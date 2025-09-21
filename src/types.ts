@@ -39,12 +39,20 @@ export interface ComparisonResponse {
 export interface Config {
   failOnSeverity: 'critical' | 'high' | 'moderate' | 'low'
   failOnScopes: ('unknown' | 'runtime' | 'development')[]
-  allowLicenses?: string[]
-  denyLicenses?: string[]
-  allowDependenciesLicenses?: string[]
-  allowGhsas: string[]
-  denyPackages: string[]
-  denyGroups: string[]
+  licenses: {
+    allow?: string[]
+    deny?: string[]
+  }
+  packages: {
+    deny?: string[]
+  }
+  groups: {
+    deny?: string[]
+  }
+  ghsas: {
+    allow?: string[]
+  }
+  licenseCheckExclusions?: string[]
   licenseCheck: boolean
   vulnerabilityCheck: boolean
   warnOnly: boolean
