@@ -56,10 +56,10 @@ export class ReviewEngine {
       }
       
       return change.vulnerabilities.some(vuln => {
-        if (this.config.allowGhsas.includes(vuln.advisory_ghsa_id)) {
+        if (this.config.ghsas?.allow?.includes(vuln.advisory_ghsa_id)) {
           return false
         }
-        
+
         return severityOrder[vuln.severity] >= minSeverityLevel
       })
     })
@@ -83,7 +83,7 @@ export class ReviewEngine {
       }
 
       const isPackageInLicenseExclusions = this.isPackageInLicenseExclusions(change.package_url)
-      if (this.config.allowDependenciesLicenses && isPackageInLicenseExclusions) {
+      if (this.config.licenseCheckExclusions && isPackageInLicenseExclusions) {
         continue
       }
 
@@ -93,18 +93,18 @@ export class ReviewEngine {
       }
 
       try {
-        if (this.config.allowLicenses && this.config.allowLicenses.length > 0) {
+        if (this.config.licenses?.allow && this.config.licenses.allow.length > 0) {
           if (spdx.isValid(change.license)) {
-            const found = spdx.satisfies(change.license, this.config.allowLicenses.join(' OR '))
+            const found = spdx.satisfies(change.license, this.config.licenses.allow.join(' OR '))
             if (!found) {
               forbidden.push(change)
             }
           } else {
             unresolved.push(change)
           }
-        } else if (this.config.denyLicenses && this.config.denyLicenses.length > 0) {
+        } else if (this.config.licenses?.deny && this.config.licenses.deny.length > 0) {
           if (spdx.isValid(change.license)) {
-            const found = spdx.satisfiesAny(change.license, this.config.denyLicenses)
+            const found = spdx.satisfiesAny(change.license, this.config.licenses.deny)
             if (found) {
               forbidden.push(change)
             }
@@ -121,22 +121,27 @@ export class ReviewEngine {
   }
 
   private filterDeniedPackages(changes: DependencyChange[]): DependencyChange[] {
-    if (!this.config.denyPackages.length && !this.config.denyGroups.length) {
+    if ((!this.config.packages?.deny || this.config.packages.deny.length === 0) &&
+        (!this.config.groups?.deny || this.config.groups.deny.length === 0)) {
       return []
     }
 
     return changes.filter(change => {
       if (change.change_type !== 'added') return false
 
-      for (const deniedPackage of this.config.denyPackages) {
-        if (change.package_url.includes(deniedPackage)) {
-          return true
+      if (this.config.packages?.deny) {
+        for (const deniedPackage of this.config.packages.deny) {
+          if (change.package_url.includes(deniedPackage)) {
+            return true
+          }
         }
       }
 
-      for (const deniedGroup of this.config.denyGroups) {
-        if (change.package_url.startsWith(deniedGroup)) {
-          return true
+      if (this.config.groups?.deny) {
+        for (const deniedGroup of this.config.groups.deny) {
+          if (change.package_url.startsWith(deniedGroup)) {
+            return true
+          }
         }
       }
 
@@ -145,11 +150,11 @@ export class ReviewEngine {
   }
 
   private isPackageInLicenseExclusions(packageUrl: string): boolean {
-    if (!this.config.allowDependenciesLicenses || this.config.allowDependenciesLicenses.length === 0) {
+    if (!this.config.licenseCheckExclusions || this.config.licenseCheckExclusions.length === 0) {
       return false
     }
 
-    for (const excludedPackage of this.config.allowDependenciesLicenses) {
+    for (const excludedPackage of this.config.licenseCheckExclusions) {
       if (packageUrl === excludedPackage || packageUrl.startsWith(excludedPackage)) {
         return true
       }

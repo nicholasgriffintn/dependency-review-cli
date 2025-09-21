@@ -128,21 +128,31 @@ fail-on-scopes:
   - runtime
   - development
 
-# License settings  
-allow-licenses:
-  - MIT
-  - Apache-2.0
-  - BSD-3-Clause
-  
+# License settings
+licenses:
+  allow:
+    - MIT
+    - Apache-2.0
+    - BSD-3-Clause
+
+# Package exclusions from license checking
+license-check-exclusions:
+  - pkg:npm/trusted-package-with-restricted-license
+
 # Package restrictions
-deny-packages:
-  - pkg:npm/lodash@4.17.20
-deny-groups:
-  - pkg:npm/@bad-namespace/
+packages:
+  deny:
+    - pkg:npm/lodash@4.17.20
+
+# Group restrictions
+groups:
+  deny:
+    - pkg:npm/@bad-namespace/
 
 # Advisory exceptions
-allow-ghsas:
-  - GHSA-1234-5678-9012
+ghsas:
+  allow:
+    - GHSA-1234-5678-9012
 
 # Check toggles
 license-check: true
