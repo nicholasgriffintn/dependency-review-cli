@@ -33,7 +33,7 @@
 	},
 	"dependencies": {
 		"@octokit/plugin-retry": "8.0.1",
-		"@octokit/request-error": "7.0.0",
+		"@octokit/request-error": "7.0.1",
 		"@octokit/rest": "22.0.0",
 		"@onebeyond/spdx-license-satisfies": "1.0.1",
 		"commander": "14.0.1",

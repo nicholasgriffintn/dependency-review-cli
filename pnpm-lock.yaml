@@ -12,8 +12,8 @@ importers:
         specifier: 8.0.1
         version: 8.0.1(@octokit/core@7.0.4)
       '@octokit/request-error':
-        specifier: 7.0.0
-        version: 7.0.0
+        specifier: 7.0.1
+        version: 7.0.1
       '@octokit/rest':
         specifier: 22.0.0
         version: 22.0.0
@@ -247,8 +247,8 @@ packages:
     peerDependencies:
       '@octokit/core': '>=7'
 
-  '@octokit/request-error@7.0.0':
-    resolution: {integrity: sha512-KRA7VTGdVyJlh0cP5Tf94hTiYVVqmt2f3I6mnimmaVz4UG3gQV/k4mDJlJv3X67iX6rmN7gSHCF8ssqeMnmhZg==}
+  '@octokit/request-error@7.0.1':
+    resolution: {integrity: sha512-CZpFwV4+1uBrxu7Cw8E5NCXDWFNf18MSY23TdxCBgjw1tXXHvTrZVsXlW8hgFTOLw8RQR1BBrMvYRtuyaijHMA==}
     engines: {node: '>= 20'}
 
   '@octokit/request@10.0.3':
@@ -433,7 +433,7 @@ snapshots:
       '@octokit/auth-token': 6.0.0
       '@octokit/graphql': 9.0.1
       '@octokit/request': 10.0.3
-      '@octokit/request-error': 7.0.0
+      '@octokit/request-error': 7.0.1
       '@octokit/types': 15.0.0
       before-after-hook: 4.0.0
       universal-user-agent: 7.0.3
@@ -470,18 +470,18 @@ snapshots:
   '@octokit/plugin-retry@8.0.1(@octokit/core@7.0.4)':
     dependencies:
       '@octokit/core': 7.0.4
-      '@octokit/request-error': 7.0.0
+      '@octokit/request-error': 7.0.1
       '@octokit/types': 14.1.0
       bottleneck: 2.19.5
 
-  '@octokit/request-error@7.0.0':
+  '@octokit/request-error@7.0.1':
     dependencies:
-      '@octokit/types': 14.1.0
+      '@octokit/types': 15.0.0
 
   '@octokit/request@10.0.3':
     dependencies:
       '@octokit/endpoint': 11.0.0
-      '@octokit/request-error': 7.0.0
+      '@octokit/request-error': 7.0.1
       '@octokit/types': 14.1.0
       fast-content-type-parse: 3.0.0
       universal-user-agent: 7.0.3
