@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@octokit/plugin-retry':
-        specifier: 8.0.1
-        version: 8.0.1(@octokit/core@7.0.4)
+        specifier: 8.0.2
+        version: 8.0.2(@octokit/core@7.0.4)
       '@octokit/request-error':
         specifier: 7.0.0
         version: 7.0.0
@@ -241,14 +241,18 @@ packages:
     peerDependencies:
       '@octokit/core': '>=6'
 
-  '@octokit/plugin-retry@8.0.1':
-    resolution: {integrity: sha512-KUoYR77BjF5O3zcwDQHRRZsUvJwepobeqiSSdCJ8lWt27FZExzb0GgVxrhhfuyF6z2B2zpO0hN5pteni1sqWiw==}
+  '@octokit/plugin-retry@8.0.2':
+    resolution: {integrity: sha512-mVPCe77iaD8g1lIX46n9bHPUirFLzc3BfIzsZOpB7bcQh1ecS63YsAgcsyMGqvGa2ARQWKEFTrhMJX2MLJVHVw==}
     engines: {node: '>= 20'}
     peerDependencies:
       '@octokit/core': '>=7'
 
   '@octokit/request-error@7.0.0':
     resolution: {integrity: sha512-KRA7VTGdVyJlh0cP5Tf94hTiYVVqmt2f3I6mnimmaVz4UG3gQV/k4mDJlJv3X67iX6rmN7gSHCF8ssqeMnmhZg==}
+    engines: {node: '>= 20'}
+
+  '@octokit/request-error@7.0.1':
+    resolution: {integrity: sha512-CZpFwV4+1uBrxu7Cw8E5NCXDWFNf18MSY23TdxCBgjw1tXXHvTrZVsXlW8hgFTOLw8RQR1BBrMvYRtuyaijHMA==}
     engines: {node: '>= 20'}
 
   '@octokit/request@10.0.3':
@@ -467,16 +471,20 @@ snapshots:
       '@octokit/core': 7.0.4
       '@octokit/types': 15.0.0
 
-  '@octokit/plugin-retry@8.0.1(@octokit/core@7.0.4)':
+  '@octokit/plugin-retry@8.0.2(@octokit/core@7.0.4)':
     dependencies:
       '@octokit/core': 7.0.4
-      '@octokit/request-error': 7.0.0
-      '@octokit/types': 14.1.0
+      '@octokit/request-error': 7.0.1
+      '@octokit/types': 15.0.0
       bottleneck: 2.19.5
 
   '@octokit/request-error@7.0.0':
     dependencies:
       '@octokit/types': 14.1.0
+
+  '@octokit/request-error@7.0.1':
+    dependencies:
+      '@octokit/types': 15.0.0
 
   '@octokit/request@10.0.3':
     dependencies:
